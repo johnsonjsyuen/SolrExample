@@ -1,27 +1,52 @@
 package com.johnson.solr;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-public class Indexer{
+public class Indexer {
 
-    public static void main(String[]args) throws IOException, SolrServerException {
+    public static void parseJsonFileIntoSolr(File file, SolrClient solrClient) throws IOException, SolrServerException {
+
+        // Create and configure an ObjectMapper instance
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+        // Create a JsonParser instance
+        try (var jsonParser = mapper.getFactory().createParser(file)) {
+
+            var counter = 0;
+            while (true) {
+                var redditComment = mapper.readValue(jsonParser, RedditComment.class);
+                solrClient.addBean(redditComment);
+                counter += 1;
+                if (counter % 1000 == 0) {
+                    solrClient.commit();
+                    System.out.println("Indexed " + counter + " comments.");
+                }
+            }//TODO need a final commit to not lose entries
+
+        }
+    }
+
+    public static void main(String[] args) throws IOException, SolrServerException {
 
         var solrClient = new SolrFactory().getSolr();
-
         //Generate and index some documents
-        for(int i=1000;i<2000;++i) {
+        for (int i = 1000; i < 2000; ++i) {
             SolrInputDocument doc = new SolrInputDocument();
             doc.addField("cat", "book");
             doc.addField("id", "book-" + i);
             doc.addField("name", "The Legend of the Hobbit part " + i);
             solrClient.add(doc);
-            if(i%100==0) solrClient.commit();  // periodically flush
+            if (i % 100 == 0) solrClient.commit();  // periodically flush
         }
         solrClient.commit();
 
@@ -70,5 +95,11 @@ public class Indexer{
         final var beanResponse = solrClient.query(beanQuery);
         final var movies = beanResponse.getBeans(Movie.class);
         System.out.println(movies.get(0));
+
+        //Index Reddit Comments Json file into Solr
+        parseJsonFileIntoSolr(new File("/home/johnson/Downloads/RC_2018-10"), solrClient);
     }
+
+
+
 }
