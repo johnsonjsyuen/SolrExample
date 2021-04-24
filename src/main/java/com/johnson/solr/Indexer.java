@@ -35,17 +35,18 @@ public class Indexer{
 
         //Query
         final SolrQuery query = new SolrQuery("Plot:dog");
-        //query.addFilterQuery("Genre:comedy");
+        query.addFilterQuery("Genre:comedy");
         query.addFacetField("Genre");
         var resp = solrClient.query(query);
 
         var results = resp.getResults();
-        var highlighting = resp.getFacetFields();
+        var facets = resp.getFacetFields();
 
         for(var doc:results){
             System.out.println(doc.toString());
             System.out.println();
         }
+        System.out.println(facets);
 
         //Java bean indexing
         final Movie johnsonMovie = Movie.builder()
