@@ -26,9 +26,6 @@ public class Indexer{
         solrClient.commit();
 
         //delete by query
-        final SolrQuery deleteQuery = new SolrQuery("cat:*");
-        deleteQuery.addFilterQuery("cat:*");
-        System.out.println(deleteQuery.toQueryString());
         solrClient.deleteByQuery("name:Legend of");
         solrClient.commit();
 
