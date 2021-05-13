@@ -9,6 +9,8 @@ Python utilizes Pysolr to do the same.
 To launch a demo Solr docker, run
 ```docker run --rm -d --name solr-initial -p 8983:8983 solr solr-precreate initial_core```
 
+This will run the latest docker version of Solr and create a "core" called initial_core.
+
 These queries performed against a Solr Docker container with
 a core called "initial_core".
 
