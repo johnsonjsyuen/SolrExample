@@ -19,9 +19,10 @@ new_film = {
     "Release_Year": 2021,
     "Origin_Ethnicity": "Australian",
     "Wiki_Page": "https://en.wikipedia.org/wiki/johnson_film",
-    }
+}
 
 solr.add(new_film)
+# Manual commit if autocommit is set to false (to enable batching)
 solr.commit()
 
 results = solr.search('Title:johnson', **{
